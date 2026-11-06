@@ -1,26 +1,247 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ───────────────────────── OM Telecom — design tokens ─────────────────────────
+   Night rooms (#0b0d14) for drama and devices, warm paper rooms (#f3f0ea) for reading.
+   Accents are sampled from the logo: OM orange, signal blue and the mascot's lavender. */
+@theme {
+  --color-night: #0b0d14;
+  --color-night-2: #12151f;
+  --color-night-3: #1b1f2c;
+  --color-paper: #f3f0ea;
+  --color-paper-2: #e9e5dd;
+  --color-paper-3: #ddd8ce;
+  --color-ink: #0f1220;
+  --color-ink-2: #3c4152;
+  --color-mute: #7b8092;
+  --color-fog: #a9adbb;
+  --color-line-dark: #262a38;
+  --color-line-light: #d6d1c7;
+  --color-om: #ff5b1f;
+  --color-om-deep: #e2470e;
+  --color-signal: #2f7bea;
+  --color-lilac: #b9aef5;
+  --color-wa: #25d366;
+  --color-wa-deep: #128c4b;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    background: var(--color-night);
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "cv11";
+  }
+  ::selection {
+    background: var(--color-om);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-om);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  img {
+    user-select: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+  @media (min-width: 768px) {
+    .shell { padding-inline: 40px; }
+  }
+  @media (min-width: 1280px) {
+    .shell { padding-inline: 56px; }
+  }
+
+  .room-night { background: var(--color-night); color: #f1efe9; }
+  .room-paper { background: var(--color-paper); color: var(--color-ink); }
+
+  /* Display type */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+    font-variation-settings: "opsz" 96, "wdth" 85;
+  }
+  .display-soft {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    font-variation-settings: "opsz" 48, "wdth" 90;
+  }
+  .text-mega { font-size: clamp(3.4rem, 11.5vw, 13rem); }
+  /* Hero halves must fit beside the centred phone window (34vh wide on desktop). */
+  .hero-headline { font-size: clamp(3.4rem, 15vw, 6.5rem); }
+  @media (min-width: 1024px) {
+    .hero-headline { font-size: min(13rem, calc((45vw - 17vh) / 4.6)); }
+  }
+  .text-hero { font-size: clamp(2.8rem, 7.4vw, 8rem); }
+  .text-title { font-size: clamp(2.2rem, 5vw, 5rem); }
+  .text-lead { font-size: clamp(1.15rem, 1.6vw, 1.45rem); line-height: 1.45; }
+
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  /* Pills */
+  .pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    height: 3.25rem;
+    padding-inline: 1.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    isolation: isolate;
+    transition: color 0.45s var(--ease-out-expo), background-color 0.45s var(--ease-out-expo), border-color 0.45s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+    will-change: transform;
+  }
+  .pill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    transform: translateY(101%);
+    transition: transform 0.55s var(--ease-out-expo);
+    background: var(--pill-fill, #fff);
+  }
+  .pill:hover::before,
+  .pill:focus-visible::before { transform: translateY(0); }
+  .pill:active { transform: scale(0.97); }
+  .pill-om { background: var(--color-om); color: #fff; --pill-fill: var(--color-night); }
+  .pill-light { background: #f3f0ea; color: var(--color-ink); --pill-fill: var(--color-om); }
+  .pill-light:hover, .pill-light:focus-visible { color: #fff; }
+  .pill-ink { background: var(--color-ink); color: #f3f0ea; --pill-fill: var(--color-om); }
+  .pill-ghost { border: 1px solid currentColor; --pill-fill: currentColor; }
+  .room-night .pill-ghost:hover, .room-night .pill-ghost:focus-visible { color: var(--color-night); }
+  .room-paper .pill-ghost:hover, .room-paper .pill-ghost:focus-visible { color: var(--color-paper); }
+  .pill-wa { background: var(--color-wa); color: #062b15; --pill-fill: #062b15; }
+  .pill-wa:hover, .pill-wa:focus-visible { color: var(--color-wa); }
+
+  .link-grow {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.6s var(--ease-out-expo);
+    padding-bottom: 2px;
+  }
+  .link-grow:hover, .link-grow:focus-visible, .link-grow[aria-current="page"] { background-size: 100% 1px; }
+
+  /* The phone-window motif */
+  .phone-frame { border-radius: clamp(28px, 4.2vw, 56px); }
+
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  .prose-om { font-size: 1.075rem; line-height: 1.75; color: var(--color-ink-2); }
+  .prose-om h2 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; color: var(--color-ink); font-size: 1.6rem; margin: 2.4rem 0 0.8rem; }
+  .prose-om p { margin: 0 0 1.1rem; }
+  .prose-om ul { margin: 0 0 1.1rem; padding-left: 1.2rem; list-style: disc; }
+  .prose-om li { margin: 0.3rem 0; }
+}
+
+/* ───────────────────────── Motion hooks ─────────────────────────
+   Content is visible without JS. `html.js` (set inline before paint) hides elements
+   that GSAP will reveal; the runtime adds `.is-in` or animates them directly. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-reveal] { opacity: 0; transform: translate3d(0, 48px, 0); }
+  html.js [data-reveal="fade"] { transform: none; }
+  html.js [data-split] .w-in { transform: translate3d(0, 110%, 0); }
+  html.js [data-clip] { clip-path: inset(100% 0% 0% 0% round 28px); }
+  html.js [data-clip] img { transform: scale(1.25); }
+}
+/* Hero: start states for the entrance (only when GSAP will run it) */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-hero-word] { transform: translateY(110%); }
+  html.js [data-hero-window] { opacity: 0; }
+  html.js [data-hero-fade] { opacity: 0; }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (pointer: fine) {
+  html.js [data-hero-caption] > * { opacity: 0; }
+}
+[data-split] .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+[data-split] .w-in { display: inline-block; will-change: transform; }
+
+/* Sticky bars that sit under the header and slide up when it hides */
+.under-header { top: 72px; transition: top 0.5s var(--ease-out-expo); }
+@media (min-width: 768px) { .under-header { top: 80px; } }
+html[data-header="hidden"] .under-header { top: 0; }
+
+/* Brand ticker */
+.ticker-track { display: flex; width: max-content; will-change: transform; }
+
+/* Route veil */
+.veil { animation: veil-lift 0.9s var(--ease-in-out-quart) both; transform-origin: top; }
+@keyframes veil-lift {
+  from { transform: scaleY(1); }
+  to { transform: scaleY(0); }
+}
+
+/* ───────────────────────── Logo intro gate ───────────────────────── */
+.om-intro { display: none; }
+html[data-intro="play"] .om-intro { display: block; }
+html[data-intro="play"] body { overflow: hidden; }
+html[data-intro="play"] [data-site-logo] { opacity: 0; }
+html[data-intro="play"] [data-intro-hide] { opacity: 0; }
+html[data-intro="play"] .om-intro:not(.is-running) { animation: intro-failsafe 0.3s ease 5s forwards; }
+@keyframes intro-failsafe { to { opacity: 0; visibility: hidden; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

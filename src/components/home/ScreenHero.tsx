@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { scenesEnabled, withGsap } from "@/lib/motion";
 import { Photo } from "@/components/ui/Photo";
 import { Arrow } from "@/components/ui/icons";
@@ -15,7 +15,8 @@ import { Arrow } from "@/components/ui/icons";
 export function ScreenHero({ brandCount }: { brandCount: number }) {
   const root = useRef<HTMLElement>(null);
 
-  useEffect(() => {
+  // Layout effect: the pin is reverted before React removes the DOM on navigation.
+  useLayoutEffect(() => {
     const el = root.current;
     if (!el) return;
     const reveal = () =>
@@ -59,67 +60,71 @@ export function ScreenHero({ brandCount }: { brandCount: number }) {
     return () => cleanup();
   }, []);
 
+  // The outer div is what React mounts/unmounts; GSAP wraps the inner <section> in a
+  // pin-spacer, so React never has to remove a node that GSAP has moved.
   return (
-    <section ref={root} aria-label="OM Telecom" className="room-night grain relative isolate h-[100svh] min-h-[40rem] overflow-hidden">
-      {/* The screen */}
-      <div
-        data-hero-window
-        className="absolute inset-0 [clip-path:inset(17vh_calc(50%_-_17vh)_17vh_calc(50%_-_17vh)_round_44px)] max-lg:[clip-path:inset(29vh_calc(50%_-_15.5vh)_17vh_calc(50%_-_15.5vh)_round_34px)]"
-      >
-        <Photo name="hero-night" alt="A phone held up on a busy street at night, its screen lit with the city behind it" eager sizes="100vw" position="50% 45%" className="scale-[1.35]" />
-        <div data-hero-shade className="absolute inset-0 bg-gradient-to-t from-night via-night/40 to-night/10 opacity-0" />
-        <span data-hero-island aria-hidden="true" className="absolute left-1/2 top-[calc(17vh_+_14px)] h-6 w-[min(30%,7rem)] -translate-x-1/2 rounded-full bg-black max-lg:top-[calc(29vh_+_12px)]" />
-      </div>
+    <div>
+      <section ref={root} aria-label="OM Telecom" className="room-night grain relative isolate h-[100svh] min-h-[40rem] overflow-hidden">
+        {/* The screen */}
+        <div
+          data-hero-window
+          className="absolute inset-0 [clip-path:inset(17vh_calc(50%_-_17vh)_17vh_calc(50%_-_17vh)_round_44px)] max-lg:[clip-path:inset(29vh_calc(50%_-_15.5vh)_17vh_calc(50%_-_15.5vh)_round_34px)]"
+        >
+          <Photo name="hero-night" alt="A phone held up on a busy street at night, its screen lit with the city behind it" eager sizes="100vw" position="50% 45%" className="scale-[1.35]" />
+          <div data-hero-shade className="absolute inset-0 bg-gradient-to-t from-night via-night/40 to-night/10 opacity-0" />
+          <span data-hero-island aria-hidden="true" className="absolute left-1/2 top-[calc(17vh_+_14px)] h-6 w-[min(30%,7rem)] -translate-x-1/2 rounded-full bg-black max-lg:top-[calc(29vh_+_12px)]" />
+        </div>
 
-      {/* Headline halves */}
-      <h1 className="display hero-headline pointer-events-none absolute inset-x-0 top-[13vh] flex flex-col items-center text-center lg:top-1/2 lg:-translate-y-1/2 lg:flex-row lg:justify-between lg:px-[2.5vw] lg:text-left">
-        <span data-hero-left className="block overflow-hidden pb-[0.06em]">
-          <span data-hero-word className="block">
-            Your next
+        {/* Headline halves */}
+        <h1 className="display hero-headline pointer-events-none absolute inset-x-0 top-[13vh] flex flex-col items-center text-center lg:top-1/2 lg:-translate-y-1/2 lg:flex-row lg:justify-between lg:px-[2.5vw] lg:text-left">
+          <span data-hero-left className="block overflow-hidden pb-[0.06em]">
+            <span data-hero-word className="block">
+              Your next
+            </span>
           </span>
-        </span>
-        <span data-hero-right className="block overflow-hidden pb-[0.06em] lg:text-right">
-          <span data-hero-word className="block text-om">
-            phone.
+          <span data-hero-right className="block overflow-hidden pb-[0.06em] lg:text-right">
+            <span data-hero-word className="block text-om">
+              phone.
+            </span>
           </span>
-        </span>
-      </h1>
+        </h1>
 
-      {/* Caption revealed as the screen opens (always visible below lg) */}
-      <div data-hero-caption className="absolute inset-x-0 bottom-0 z-10 hidden lg:block">
-        <div className="shell flex items-end justify-between gap-10 pb-14">
-          <div>
-            <p className="kicker text-om">{brandCount} brands · one store team</p>
-            <p className="display-soft mt-4 max-w-2xl text-[clamp(2rem,3.6vw,3.8rem)]">Compare it in hand. Buy it over WhatsApp.</p>
+        {/* Caption revealed as the screen opens (always visible below lg) */}
+        <div data-hero-caption className="absolute inset-x-0 bottom-0 z-10 hidden lg:block">
+          <div className="shell flex items-end justify-between gap-10 pb-14">
+            <div>
+              <p className="kicker text-om">{brandCount} brands · one store team</p>
+              <p className="display-soft mt-4 max-w-2xl text-[clamp(2rem,3.6vw,3.8rem)]">Compare it in hand. Buy it over WhatsApp.</p>
+            </div>
+            <div className="flex gap-3">
+              <Link href="/mobiles" className="pill pill-om" data-magnetic>
+                Shop mobiles <Arrow />
+              </Link>
+              <Link href="/stores" className="pill pill-ghost">
+                Find a store
+              </Link>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <Link href="/mobiles" className="pill pill-om" data-magnetic>
-              Shop mobiles <Arrow />
+        </div>
+
+        <div className="absolute inset-x-0 bottom-6 z-10 flex flex-col items-center gap-4 px-5 lg:hidden">
+          <p data-hero-fade className="max-w-xs text-center text-sm text-white/70">
+            Compare it in hand. Buy it over WhatsApp.
+          </p>
+          <div data-hero-fade className="flex gap-2">
+            <Link href="/mobiles" className="pill pill-om !h-12">
+              Shop mobiles
             </Link>
-            <Link href="/stores" className="pill pill-ghost">
-              Find a store
+            <Link href="/stores" className="pill pill-ghost !h-12">
+              Stores
             </Link>
           </div>
         </div>
-      </div>
 
-      <div className="absolute inset-x-0 bottom-6 z-10 flex flex-col items-center gap-4 px-5 lg:hidden">
-        <p data-hero-fade className="max-w-xs text-center text-sm text-white/70">
-          Compare it in hand. Buy it over WhatsApp.
+        <p data-hero-hint data-hero-fade aria-hidden="true" className="kicker absolute bottom-9 left-1/2 hidden -translate-x-1/2 items-center gap-3 text-white/50 lg:flex">
+          <span className="block h-8 w-px animate-pulse bg-white/40" /> Scroll to open the screen
         </p>
-        <div data-hero-fade className="flex gap-2">
-          <Link href="/mobiles" className="pill pill-om !h-12">
-            Shop mobiles
-          </Link>
-          <Link href="/stores" className="pill pill-ghost !h-12">
-            Stores
-          </Link>
-        </div>
-      </div>
-
-      <p data-hero-hint data-hero-fade aria-hidden="true" className="kicker absolute bottom-9 left-1/2 hidden -translate-x-1/2 items-center gap-3 text-white/50 lg:flex">
-        <span className="block h-8 w-px animate-pulse bg-white/40" /> Scroll to open the screen
-      </p>
-    </section>
+      </section>
+    </div>
   );
 }

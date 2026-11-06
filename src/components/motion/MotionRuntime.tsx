@@ -19,6 +19,7 @@ import { finePointer, getLenis, loadGsap, reducedMotion, requestRefresh, startLe
  */
 let popNav = false;
 const positions = new Map<string, number>();
+let saveLocked = false;
 
 export function MotionRuntime() {
   const pathname = usePathname();
@@ -58,16 +59,29 @@ export function MotionRuntime() {
   // Remember where the visitor was on each page (pinned scenes make the browser's own
   // restoration unreliable: the page is briefly shorter until the pins are rebuilt).
   useEffect(() => {
-    let raf = 0;
+    // Next.js scrolls the outgoing page to the top around the URL change, so positions are
+    // frozen from the moment a navigation starts until the new page has settled.
     const save = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => positions.set(location.pathname, window.scrollY));
+      if (!saveLocked) positions.set(location.pathname, window.scrollY);
+    };
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement).closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!a || a.target === "_blank" || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      const url = new URL(a.href, location.href);
+      if (url.origin !== location.origin || url.pathname === location.pathname) return;
+      positions.set(location.pathname, window.scrollY);
+      saveLocked = true;
+    };
+    const onPop = () => {
+      popNav = true;
+      saveLocked = true;
     };
     window.addEventListener("scroll", save, { passive: true });
-    const onPop = () => (popNav = true);
+    document.addEventListener("click", onClick, true);
     window.addEventListener("popstate", onPop);
     return () => {
       window.removeEventListener("scroll", save);
+      document.removeEventListener("click", onClick, true);
       window.removeEventListener("popstate", onPop);
     };
   }, []);
@@ -84,10 +98,12 @@ export function MotionRuntime() {
     };
     to(0);
     requestRefresh(60);
-    if (target <= 0) return;
     const timer = setTimeout(() => {
-      to(target);
-      loadGsap().then(({ ScrollTrigger }) => ScrollTrigger.update());
+      if (target > 0) {
+        to(target);
+        loadGsap().then(({ ScrollTrigger }) => ScrollTrigger.update());
+      }
+      saveLocked = false;
     }, 450);
     return () => clearTimeout(timer);
   }, [pathname]);
